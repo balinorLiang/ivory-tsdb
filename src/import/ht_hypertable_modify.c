@@ -28,7 +28,7 @@
  * otherwise, return true.
  */
 bool
-ht_ExecUpdatePrologue(ModifyTableContext *context, ResultRelInfo *resultRelInfo,
+ht_ExecUpdatePrologue(ModifyTableContextStruct *context, ResultRelInfo *resultRelInfo,
 					  ItemPointer tupleid, HeapTuple oldtuple, TupleTableSlot *slot,
 					  TM_Result *result)
 {
@@ -101,8 +101,8 @@ ht_ExecUpdatePrepareSlot(ResultRelInfo * resultRelInfo, TupleTableSlot * slot, E
  * indexes current for the update.
  */
 TM_Result
-ht_ExecUpdateAct(ModifyTableContext * context, ResultRelInfo * resultRelInfo, ItemPointer tupleid,
-		 HeapTuple oldtuple, TupleTableSlot * slot, bool canSetTag, UpdateContext * updateCxt){
+ht_ExecUpdateAct(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo, ItemPointer tupleid,
+		 HeapTuple oldtuple, TupleTableSlot * slot, bool canSetTag, UpdateContextStruct * updateCxt){
 	EState	       *estate = context->estate;
 	Relation	resultRelationDesc = resultRelInfo->ri_RelationDesc;
 	bool		partition_constraint_failed;
@@ -192,7 +192,7 @@ ht_ExecUpdateAct(ModifyTableContext * context, ResultRelInfo * resultRelInfo, It
  * returns indicating that the tuple was updated.
  */
 void
-ht_ExecUpdateEpilogue(ModifyTableContext * context, UpdateContext * updateCxt,
+ht_ExecUpdateEpilogue(ModifyTableContextStruct * context, UpdateContextStruct * updateCxt,
      ResultRelInfo * resultRelInfo, ItemPointer tupleid, HeapTuple oldtuple,
 		      TupleTableSlot * slot, List * recheckIndexes)
 {
@@ -253,7 +253,7 @@ ht_ExecUpdateEpilogue(ModifyTableContext * context, UpdateContext * updateCxt,
  * the delete a no-op; otherwise, return true.
  */
 bool
-ht_ExecDeletePrologue(ModifyTableContext *context, ResultRelInfo *resultRelInfo,
+ht_ExecDeletePrologue(ModifyTableContextStruct *context, ResultRelInfo *resultRelInfo,
 					  ItemPointer tupleid, HeapTuple oldtuple, TupleTableSlot **epqreturnslot,
 					  TM_Result *result)
 {
@@ -279,7 +279,7 @@ ht_ExecDeletePrologue(ModifyTableContext *context, ResultRelInfo *resultRelInfo,
  * Caller is in charge of doing EvalPlanQual as necessary
  */
 TM_Result
-ht_ExecDeleteAct(ModifyTableContext * context, ResultRelInfo * resultRelInfo, ItemPointer tupleid,
+ht_ExecDeleteAct(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo, ItemPointer tupleid,
 		 bool changingPart){
 	EState	       *estate = context->estate;
 
@@ -301,7 +301,7 @@ ht_ExecDeleteAct(ModifyTableContext * context, ResultRelInfo * resultRelInfo, It
  * cross-partition tuple move.
  */
 void
-ht_ExecDeleteEpilogue(ModifyTableContext * context, ResultRelInfo * resultRelInfo, ItemPointer tupleid,
+ht_ExecDeleteEpilogue(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo, ItemPointer tupleid,
 		      HeapTuple oldtuple)
 {
 	ModifyTableState *mtstate = context->mtstate;
@@ -379,7 +379,7 @@ ExecProcessReturning(ResultRelInfo *resultRelInfo, TupleTableSlot *tupleSlot,
 
 #if PG15_GE
 
-TupleTableSlot *ExecInsert(ModifyTableContext * context, ResultRelInfo * resultRelInfo,
+TupleTableSlot *ExecInsert(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo,
 			   TupleTableSlot * slot, bool canSetTag);
 
 static TupleTableSlot * mergeGetUpdateNewTuple(ResultRelInfo * relinfo, TupleTableSlot * planSlot,
@@ -408,7 +408,7 @@ static TupleTableSlot * mergeGetUpdateNewTuple(ResultRelInfo * relinfo, TupleTab
  */
 
 TupleTableSlot*
-ht_ExecMergeMatched(ModifyTableContext * context, ResultRelInfo * resultRelInfo, ItemPointer tupleid,
+ht_ExecMergeMatched(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo, ItemPointer tupleid,
 		    HeapTuple oldtuple, bool canSetTag, bool *matched)
 {
 
@@ -473,7 +473,7 @@ lmerge_matched:;
 		CmdType		commandType = relaction->mas_action->commandType;
 		List	       *recheckIndexes = NIL;
 		TM_Result	result;
-		UpdateContext	updateCxt = {0};
+		UpdateContextStruct	updateCxt = {0};
 
 		/*
 		 * Test condition, if any.
@@ -855,7 +855,7 @@ if (TransactionIdIsCurrentTransactionId(context->tmfd.xmax))
  * Execute the first qualifying NOT MATCHED action.
  */
 TupleTableSlot*
-ht_ExecMergeNotMatched(ModifyTableContext * context, ResultRelInfo * resultRelInfo,
+ht_ExecMergeNotMatched(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo,
 		       ChunkDispatchState * cds, bool canSetTag)
 {
 	ModifyTableState *mtstate = context->mtstate;
@@ -975,7 +975,7 @@ ht_ExecMergeNotMatched(ModifyTableContext * context, ResultRelInfo * resultRelIn
  * Perform MERGE.
  */
 TupleTableSlot *
-ht_ExecMerge(ModifyTableContext * context, ResultRelInfo * resultRelInfo, ChunkDispatchState * cds,
+ht_ExecMerge(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo, ChunkDispatchState * cds,
 	     ItemPointer tupleid, HeapTuple oldtuple, bool canSetTag)
 {
 	bool		matched;
@@ -1054,7 +1054,7 @@ ht_ExecMerge(ModifyTableContext * context, ResultRelInfo * resultRelInfo, ChunkD
 }
 
 /*
- * Callback for ModifyTableContext->GetUpdateNewTuple for use by MERGE.  It
+ * Callback for ModifyTableContextStruct->GetUpdateNewTuple for use by MERGE.  It
  * computes the updated tuple by projecting from the current merge action's
  * projection.
  */

@@ -22,7 +22,7 @@
  * state and some output variables populated by ExecUpdateAct() and
  * ExecDeleteAct() to report the result of their actions to callers.
  */
-typedef struct ModifyTableContext {
+typedef struct ModifyTableContextStruct {
 	/* Operation state */
 	ModifyTableState *mtstate;
 	EPQState       *epqstate;
@@ -68,12 +68,12 @@ typedef struct ModifyTableContext {
 	 * EvalPlanQual on it
 	 */
 	LockTupleMode	lockmode;
-}		ModifyTableContext;
+}		ModifyTableContextStruct;
 
 /*
  * Context struct containing output data specific to UPDATE operations.
  */
-typedef struct UpdateContext
+typedef struct UpdateContextStruct
 {
 	bool updated; /* did UPDATE actually occur? */
 #if PG16_LT
@@ -84,31 +84,31 @@ typedef struct UpdateContext
 
 	bool crossPartUpdate; /* was it a cross-partition
 						   * update? */
-} UpdateContext;
+} UpdateContextStruct;
 
-bool		ht_ExecUpdatePrologue(ModifyTableContext * context, ResultRelInfo * resultRelInfo,
+bool		ht_ExecUpdatePrologue(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo,
 	    ItemPointer tupleid, HeapTuple oldtuple, TupleTableSlot * slot, TM_Result *result);
 void		ht_ExecUpdatePrepareSlot(ResultRelInfo * resultRelInfo, TupleTableSlot * slot, EState * estate);
-TM_Result	ht_ExecUpdateAct(ModifyTableContext * context, ResultRelInfo * resultRelInfo,
+TM_Result	ht_ExecUpdateAct(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo,
 	     ItemPointer tupleid, HeapTuple oldtuple, TupleTableSlot * slot,
-				 bool canSetTag, UpdateContext * updateCxt);
-void		ht_ExecUpdateEpilogue(ModifyTableContext * context, UpdateContext * updateCxt,
+				 bool canSetTag, UpdateContextStruct * updateCxt);
+void		ht_ExecUpdateEpilogue(ModifyTableContextStruct * context, UpdateContextStruct * updateCxt,
      ResultRelInfo * resultRelInfo, ItemPointer tupleid, HeapTuple oldtuple,
 			      TupleTableSlot * slot, List * recheckIndexes);
 
-bool		ht_ExecDeletePrologue(ModifyTableContext * context, ResultRelInfo * resultRelInfo,
+bool		ht_ExecDeletePrologue(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo,
   ItemPointer tupleid, HeapTuple oldtuple, TupleTableSlot * *epqreturnslot, TM_Result *result);
-TM_Result	ht_ExecDeleteAct(ModifyTableContext * context, ResultRelInfo * resultRelInfo,
+TM_Result	ht_ExecDeleteAct(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo,
 				 ItemPointer tupleid, bool changingPart);
-void		ht_ExecDeleteEpilogue(ModifyTableContext * context, ResultRelInfo * resultRelInfo,
+void		ht_ExecDeleteEpilogue(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo,
 				   ItemPointer tupleid, HeapTuple oldtuple);
 
 #if PG15_GE
 TupleTableSlot *
-ht_ExecMerge(ModifyTableContext * context, ResultRelInfo * resultRelInfo, ChunkDispatchState * cds,
+ht_ExecMerge(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo, ChunkDispatchState * cds,
 	     ItemPointer tupleid, HeapTuple oldtuple, bool canSetTag);
-TupleTableSlot*		ht_ExecMergeMatched(ModifyTableContext * context, ResultRelInfo * resultRelInfo,
+TupleTableSlot*		ht_ExecMergeMatched(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo,
 				    ItemPointer tupleid, HeapTuple oldtuple, bool canSetTag, bool *matched);
-TupleTableSlot*		ht_ExecMergeNotMatched(ModifyTableContext * context, ResultRelInfo * resultRelInfo,
+TupleTableSlot*		ht_ExecMergeNotMatched(ModifyTableContextStruct * context, ResultRelInfo * resultRelInfo,
 				  ChunkDispatchState * cds, bool canSetTag);
 #endif

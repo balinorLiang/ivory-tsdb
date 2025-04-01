@@ -41,14 +41,14 @@ static TupleTableSlot *ExecGetInsertNewTuple(ResultRelInfo *relinfo, TupleTableS
 static void ExecBatchInsert(ModifyTableState *mtstate, ResultRelInfo *resultRelInfo,
 							TupleTableSlot **slots, TupleTableSlot **planSlots, int numSlots,
 							EState *estate, bool canSetTag);
-static TupleTableSlot *ExecDelete(ModifyTableContext *context, ResultRelInfo *resultRelInfo,
+static TupleTableSlot *ExecDelete(ModifyTableContextStruct *context, ResultRelInfo *resultRelInfo,
 								  ItemPointer tupleid, HeapTuple oldtuple, bool processReturning,
 								  bool canSetTag, bool changingPart, bool *tupleDeleted,
 								  TupleTableSlot **epqreturnslot);
-static TupleTableSlot *ExecUpdate(ModifyTableContext *context, ResultRelInfo *resultRelInfo,
+static TupleTableSlot *ExecUpdate(ModifyTableContextStruct *context, ResultRelInfo *resultRelInfo,
 								  ItemPointer tupleid, HeapTuple oldtuple, TupleTableSlot *slot,
 								  bool canSetTag);
-static bool ExecOnConflictUpdate(ModifyTableContext *context, ResultRelInfo *resultRelInfo,
+static bool ExecOnConflictUpdate(ModifyTableContextStruct *context, ResultRelInfo *resultRelInfo,
 								 ItemPointer conflictTid, TupleTableSlot *excludedSlot,
 								 bool canSetTag, TupleTableSlot **returning);
 static void ExecCheckTupleVisible(EState *estate, Relation rel, TupleTableSlot *slot);
@@ -555,7 +555,7 @@ ExecModifyTable(CustomScanState *cs_node, PlanState *pstate)
 {
 	HypertableModifyState *ht_state = (HypertableModifyState *) cs_node;
 	ModifyTableState *node = castNode(ModifyTableState, pstate);
-	ModifyTableContext context;
+	ModifyTableContextStruct context;
 	EState *estate = node->ps.state;
 	CmdType operation = node->operation;
 	ResultRelInfo *resultRelInfo;
@@ -1431,7 +1431,7 @@ ExecGetUpdateNewTuple(ResultRelInfo *relinfo, TupleTableSlot *planSlot, TupleTab
  * copied and modified version of ExecInsert from executor/nodeModifyTable.c
  */
 TupleTableSlot *
-ExecInsert(ModifyTableContext *context, ResultRelInfo *resultRelInfo, TupleTableSlot *slot,
+ExecInsert(ModifyTableContextStruct *context, ResultRelInfo *resultRelInfo, TupleTableSlot *slot,
 		   bool canSetTag)
 {
 	ModifyTableState *mtstate = context->mtstate;
@@ -1934,14 +1934,14 @@ ExecBatchInsert(ModifyTableState *mtstate, ResultRelInfo *resultRelInfo, TupleTa
  * copied and modified version of ExecUpdate from executor/nodeModifyTable.c
  */
 static TupleTableSlot *
-ExecUpdate(ModifyTableContext *context, ResultRelInfo *resultRelInfo, ItemPointer tupleid,
+ExecUpdate(ModifyTableContextStruct *context, ResultRelInfo *resultRelInfo, ItemPointer tupleid,
 		   HeapTuple oldtuple, TupleTableSlot *slot, bool canSetTag)
 {
 	EState *estate = context->estate;
 	Relation resultRelationDesc = resultRelInfo->ri_RelationDesc;
 	TM_Result result;
 	List *recheckIndexes = NIL;
-	UpdateContext updateCxt = { 0 };
+	UpdateContextStruct updateCxt = { 0 };
 
 	/*
 	 * Prepare for the update. This includes BEFORE ROW triggers, so we're
@@ -2181,7 +2181,7 @@ ExecUpdate(ModifyTableContext *context, ResultRelInfo *resultRelInfo, ItemPointe
  * copied verbatim from executor/nodeModifyTable.c
  */
 static bool
-ExecOnConflictUpdate(ModifyTableContext *context, ResultRelInfo *resultRelInfo,
+ExecOnConflictUpdate(ModifyTableContextStruct *context, ResultRelInfo *resultRelInfo,
 					 ItemPointer conflictTid, TupleTableSlot *excludedSlot, bool canSetTag,
 					 TupleTableSlot **returning)
 {
@@ -2472,7 +2472,7 @@ ExecCheckTIDVisible(EState *estate, ResultRelInfo *relinfo, ItemPointer tid,
  * copied from executor/nodeModifyTable.c
  */
 static TupleTableSlot *
-ExecDelete(ModifyTableContext *context, ResultRelInfo *resultRelInfo, ItemPointer tupleid,
+ExecDelete(ModifyTableContextStruct *context, ResultRelInfo *resultRelInfo, ItemPointer tupleid,
 		   HeapTuple oldtuple, bool processReturning, bool canSetTag, bool changingPart,
 		   bool *tupleDeleted, TupleTableSlot **epqreturnslot)
 {
